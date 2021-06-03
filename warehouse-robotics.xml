@@ -5,7 +5,12 @@
 const int N = 10;
 const int M = 10;
 const int P = 20;
+const int K = 1;
 const int MAX_T=10;
+
+int head=0;
+int tail=0;
+int queue_length=0;
 
 typedef struct {
 bool isPodOn;
@@ -30,6 +35,7 @@ typedef struct{
 Pod pod;
 } Task;
 
+Task tasks[MAX_T];
 
 chan pick, release, claim;</declaration>
 	<template>
@@ -37,25 +43,20 @@ chan pick, release, claim;</declaration>
 		<parameter>int T</parameter>
 		<declaration>clock x;
 
-int head=0;
-int tail=0;
-int queue_length=0;
-
-Task tasks[MAX_T];
 
 Task create_task(){
     double rand;
     int i;
     bool flag=false;
     Task t;
-    do{
+    do {
         rand=random(0-(P-1));
         i= fint(rand); 
         if(pods[i].assigned==false){
             flag=true;
             pods[i].assigned=true;
         }
-    }while(!flag);
+    } while(!flag);
     t.pod=pods[i];
     return t;
 }
@@ -69,8 +70,11 @@ void enqueue(){
 void dequeue(){
     queue_length--;
     head=(head+1)%MAX_T;
-}</declaration>
+}
+
+</declaration>
 		<location id="id0" x="-1521" y="-331">
+			<name x="-1649" y="-365">dispatcher_normal</name>
 			<label kind="invariant" x="-1538" y="-306">x&lt;=T</label>
 		</location>
 		<location id="id1" x="-1198" y="-306">
@@ -92,53 +96,153 @@ void dequeue(){
 		<transition>
 			<source ref="id0"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-1487" y="-408">x&gt;=T &amp;&amp; queue_length&lt;MAX_T</label>
-			<label kind="assignment" x="-1453" y="-391">enqueue(), x=0</label>
-			<nail x="-1504" y="-382"/>
-			<nail x="-1453" y="-382"/>
+			<label kind="guard" x="-1453" y="-450">x&gt;=T &amp;&amp; queue_length&lt;MAX_T</label>
+			<label kind="assignment" x="-1411" y="-433">enqueue(), x=0</label>
+			<nail x="-1470" y="-424"/>
+			<nail x="-1419" y="-424"/>
 		</transition>
 		<transition>
 			<source ref="id0"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-1597" y="-365">claim?</label>
-			<label kind="assignment" x="-1614" y="-382">dequeue()</label>
-			<nail x="-1606" y="-340"/>
-			<nail x="-1580" y="-280"/>
+			<label kind="guard" x="-1768" y="-340">queue_length &gt; 0</label>
+			<label kind="synchronisation" x="-1742" y="-306">claim?</label>
+			<label kind="assignment" x="-1751" y="-323">dequeue()</label>
+			<nail x="-1734" y="-280"/>
+			<nail x="-1717" y="-238"/>
 		</transition>
 	</template>
 	<template>
 		<name x="5" y="5">Robot</name>
 		<declaration>// Place local declarations here.
 
+clock t;
+bool arrived_pod, arrived_delivery, arrived_back;
+int x,y;
+Task myTask;
+
+void claimTask() {
+    myTask = tasks[head];
+    arrived_pod = false;
+    arrived_delivery = false;
+}
+
+void next_step() {
+
+}
+
+void next_step_to_pod() {
+
+    next_step();
+
+}
+
+void next_step_to_delivery() {
+
+    next_step();
+
+}
+
+void next_step_to_return() {
+
+    next_step();
+
+}
 </declaration>
-		<location id="id2" x="-1351" y="-467">
-			<name x="-1361" y="-501">initial</name>
+		<location id="id2" x="-2915" y="-816">
+			<name x="-2958" y="-850">waiting_task</name>
+		</location>
+		<location id="id3" x="-2720" y="-654">
+			<name x="-2822" y="-654">getting_pod</name>
+			<label kind="invariant" x="-2788" y="-671">t&lt;=K</label>
+		</location>
+		<location id="id4" x="-2439" y="-714">
+			<name x="-2439" y="-748">reaching_delivery</name>
+		</location>
+		<location id="id5" x="-2533" y="-867">
+			<name x="-2543" y="-901">waiting_release</name>
+		</location>
+		<location id="id6" x="-2677" y="-850">
+			<name x="-2687" y="-884">returning_pod</name>
+			<label kind="invariant" x="-2703" y="-901">t&lt;=K</label>
 		</location>
 		<init ref="id2"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-2856" y="-867">arrived_back==true</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-2720" y="-773">t&gt;=K &amp;&amp; arrived_back==false</label>
+			<label kind="assignment" x="-2711" y="-756">next_step_to_return(), t=0</label>
+			<nail x="-2703" y="-799"/>
+			<nail x="-2643" y="-773"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-2626" y="-850">release?</label>
+			<label kind="assignment" x="-2618" y="-833">t=0</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-2507" y="-875">arrived_delivery==true</label>
+			<label kind="synchronisation" x="-2507" y="-858">pick!</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-2311" y="-672">t&gt;=K &amp;&amp; arrived_delivery==false</label>
+			<label kind="assignment" x="-2311" y="-655">next_step_to_delivery(), t=0</label>
+			<nail x="-2311" y="-612"/>
+			<nail x="-2328" y="-706"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-2644" y="-663">arrived_pod==true</label>
+			<label kind="assignment" x="-2610" y="-680">t=0</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-2746" y="-552">t&gt;=K &amp;&amp; arrived_pod==false</label>
+			<label kind="assignment" x="-2746" y="-569">next_step_to_pod(), t=0</label>
+			<nail x="-2746" y="-586"/>
+			<nail x="-2669" y="-578"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-2915" y="-739">claim!</label>
+			<label kind="assignment" x="-2915" y="-722">claimTask(), t=0</label>
+		</transition>
 	</template>
 	<template>
 		<name>Human</name>
 		<parameter>int H</parameter>
 		<declaration>clock x;
 </declaration>
-		<location id="id3" x="-450" y="-204">
+		<location id="id7" x="-450" y="-204">
 			<name x="-460" y="-238">idle</name>
 		</location>
-		<location id="id4" x="-289" y="-85">
+		<location id="id8" x="-289" y="-85">
 			<name x="-297" y="-68">picking</name>
 			<label kind="invariant" x="-263" y="-93">x&lt;=H</label>
 		</location>
-		<init ref="id3"/>
+		<init ref="id7"/>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id3"/>
+			<source ref="id8"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-307" y="-174">x&gt;=H</label>
 			<label kind="synchronisation" x="-314" y="-195">release!</label>
 			<nail x="-316" y="-174"/>
 		</transition>
 		<transition>
-			<source ref="id3"/>
-			<target ref="id4"/>
+			<source ref="id7"/>
+			<target ref="id8"/>
 			<label kind="synchronisation" x="-433" y="-68">pick?</label>
 			<label kind="assignment" x="-433" y="-85">x=0</label>
 			<nail x="-399" y="-93"/>
@@ -149,11 +253,11 @@ r = Robot();
 h = Human(10);
 t = TaskDispatcher(10);
 // List one or more processes to be composed into a system.
-system r, h, t;
+system r, t;
     </system>
 	<queries>
 		<query>
-			<formula></formula>
+			<formula>A[] not deadlock</formula>
 			<comment></comment>
 		</query>
 	</queries>
