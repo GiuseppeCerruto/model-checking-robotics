@@ -43,6 +43,11 @@ chan pick, release, claim;</declaration>
 		<parameter>int T</parameter>
 		<declaration>clock x;
 
+int fint_test(double x) {
+    int y=0;
+    while(y&lt;x) y++;
+    return y;
+}
 
 Task create_task(){
     double rand;
@@ -50,8 +55,8 @@ Task create_task(){
     bool flag=false;
     Task t;
     do {
-        rand=random(0-(P-1));
-        i= fint(rand); 
+        rand=random(P-1);
+        i= fint_test(rand); 
         if(pods[i].assigned==false){
             flag=true;
             pods[i].assigned=true;
@@ -66,49 +71,41 @@ void enqueue(){
     tasks[tail]=create_task();
     tail=(tail+1)%MAX_T;
 }
-
-void dequeue(){
-    queue_length--;
-    head=(head+1)%MAX_T;
-}
-
 </declaration>
-		<location id="id0" x="-1521" y="-331">
-			<name x="-1649" y="-365">dispatcher_normal</name>
-			<label kind="invariant" x="-1538" y="-306">x&lt;=T</label>
+		<location id="id0" x="-1836" y="-374">
+			<name x="-1998" y="-391">dispatcher_normal</name>
+			<label kind="invariant" x="-1844" y="-348">x&lt;=T</label>
 		</location>
-		<location id="id1" x="-1198" y="-306">
-			<name x="-1208" y="-340">Overflow</name>
+		<location id="id1" x="-1513" y="-349">
+			<name x="-1523" y="-383">Overflow</name>
 			<urgent/>
 		</location>
 		<init ref="id0"/>
 		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-2023" y="-263">claim?</label>
+			<nail x="-2022" y="-314"/>
+			<nail x="-1912" y="-221"/>
+		</transition>
+		<transition>
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="assignment" x="-1300" y="-221">x=0</label>
-			<nail x="-1284" y="-229"/>
+			<label kind="assignment" x="-1615" y="-264">x=0</label>
+			<nail x="-1599" y="-272"/>
 		</transition>
 		<transition>
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-1462" y="-348">x&gt;=T &amp;&amp; queue_length==MAX_T</label>
+			<label kind="guard" x="-1777" y="-391">x==T &amp;&amp; queue_length==MAX_T</label>
 		</transition>
 		<transition>
 			<source ref="id0"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-1453" y="-450">x&gt;=T &amp;&amp; queue_length&lt;MAX_T</label>
-			<label kind="assignment" x="-1411" y="-433">enqueue(), x=0</label>
-			<nail x="-1470" y="-424"/>
-			<nail x="-1419" y="-424"/>
-		</transition>
-		<transition>
-			<source ref="id0"/>
-			<target ref="id0"/>
-			<label kind="guard" x="-1768" y="-340">queue_length &gt; 0</label>
-			<label kind="synchronisation" x="-1742" y="-306">claim?</label>
-			<label kind="assignment" x="-1751" y="-323">dequeue()</label>
-			<nail x="-1734" y="-280"/>
-			<nail x="-1717" y="-238"/>
+			<label kind="guard" x="-1768" y="-493">x==T &amp;&amp; queue_length&lt;MAX_T</label>
+			<label kind="assignment" x="-1726" y="-476">enqueue(), x=0</label>
+			<nail x="-1785" y="-467"/>
+			<nail x="-1734" y="-467"/>
 		</transition>
 	</template>
 	<template>
@@ -124,32 +121,35 @@ void claimTask() {
     myTask = tasks[head];
     arrived_pod = false;
     arrived_delivery = false;
+    queue_length--;
+    head=(head+1)%MAX_T;
 }
 
-void next_step() {
+void next_step(int x, int y) {
 
 }
 
 void next_step_to_pod() {
-
-    next_step();
+    //arrived_pod = true;
+    next_step(myTask.pod.x, myTask.pod.y);
 
 }
 
 void next_step_to_delivery() {
-
-    next_step();
+    //arrived_delivery = true;
+    //next_step();
 
 }
 
 void next_step_to_return() {
-
-    next_step();
+    //arrived_back = true;
+    next_step(myTask.pod.x, myTask.pod.y);
 
 }
 </declaration>
-		<location id="id2" x="-2915" y="-816">
-			<name x="-2958" y="-850">waiting_task</name>
+		<location id="id2" x="-2975" y="-833">
+			<name x="-3018" y="-867">waiting_task</name>
+			<label kind="invariant" x="-3136" y="-824">queue_length == 0</label>
 		</location>
 		<location id="id3" x="-2720" y="-654">
 			<name x="-2822" y="-654">getting_pod</name>
@@ -169,7 +169,7 @@ void next_step_to_return() {
 		<transition>
 			<source ref="id6"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-2856" y="-867">arrived_back==true</label>
+			<label kind="guard" x="-2881" y="-867">arrived_back==true</label>
 		</transition>
 		<transition>
 			<source ref="id6"/>
@@ -188,8 +188,8 @@ void next_step_to_return() {
 		<transition>
 			<source ref="id4"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-2507" y="-875">arrived_delivery==true</label>
-			<label kind="synchronisation" x="-2507" y="-858">pick!</label>
+			<label kind="guard" x="-2482" y="-833">arrived_delivery==true</label>
+			<label kind="synchronisation" x="-2482" y="-816">pick!</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
@@ -216,8 +216,8 @@ void next_step_to_return() {
 		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-2915" y="-739">claim!</label>
-			<label kind="assignment" x="-2915" y="-722">claimTask(), t=0</label>
+			<label kind="guard" x="-2966" y="-739">queue_length &gt; 0</label>
+			<label kind="assignment" x="-2966" y="-722">claimTask(), t=0</label>
 		</transition>
 	</template>
 	<template>
@@ -249,15 +249,19 @@ void next_step_to_return() {
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-r = Robot();
-h = Human(10);
-t = TaskDispatcher(10);
+robot = Robot();
+human = Human(10);
+dispatcher = TaskDispatcher(5);
 // List one or more processes to be composed into a system.
-system r, t;
+system robot, dispatcher, human;
     </system>
 	<queries>
 		<query>
 			<formula>A[] not deadlock</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; dispatcher.Overflow</formula>
 			<comment></comment>
 		</query>
 	</queries>
