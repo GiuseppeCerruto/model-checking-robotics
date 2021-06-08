@@ -7,6 +7,11 @@ const int M = 10;
 const int P = 20;
 const int K = 1;
 const int MAX_T = 10;
+const int DeliveryColumn = N-1; // line where robots queue for the delivery point
+const int wait_row = 0;    // line where robots without a task rests
+const int pick_row = N-4; // line where robots travel to reach the desidered pods line in order to pick a pod
+const int delivery_row = N-3; // line where robots travel to reach the desidered pods line in order to deliver a pod
+const int new_task_row = wait_row + 1;
 
 int freePods = P;
 int head=0;
@@ -14,15 +19,18 @@ int tail=0;
 int queue_length=0;
 
 typedef struct {
-    bool isPodOn;
     bool isRobotOn;
-    bool isEntry;
-    bool isDelivery;
-    bool will_be_occupied;
 } Square;
 
 Square matrix[N][M]; 
 
+typedef struct{
+int x;
+int y;
+} Position;
+ 
+Position delivery;
+Position entry;
 
 typedef struct {
     int x;
@@ -185,7 +193,7 @@ void next_step_to_return() {
 		</location>
 		<location id="id6" x="-2677" y="-850">
 			<name x="-2687" y="-884">returning_pod</name>
-			<label kind="invariant" x="-2703" y="-901">t&lt;=K</label>
+			<label kind="invariant" x="-2686" y="-901">t&lt;=K</label>
 		</location>
 		<location id="id7" x="-2363" y="-731">
 			<name x="-2346" y="-739">waiting_human</name>
