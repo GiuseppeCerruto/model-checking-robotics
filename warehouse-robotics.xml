@@ -2,8 +2,8 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-const int N = 10;
-const int M = 10;
+const int N = 12;
+const int M = 16;
 const int P = 20;
 const int K = 1;
 const int MAX_T = 10;
@@ -139,7 +139,7 @@ void enqueue(){
 
 clock t;
 
-bool arrived_pod, arrived_delivery, arrived_back;
+bool arrived_pod, arrived_delivery, arrived_back, repositioned;
 int x,y;
 Task myTask;
 
@@ -148,6 +148,7 @@ void claimTask() {
     arrived_pod = false;
     arrived_delivery = false;
     arrived_back = false;
+    repositioned=false;
 }
 
 void freePod() {
@@ -172,13 +173,66 @@ void next_step_to_delivery() {
 }
 
 void next_step_to_return() {
-    arrived_back = true;
-    //next_step(myTask.pod.x, myTask.pod.y);
+    //da delivery, spostamento a sx per raggiungere la colonna N-3
+    if( y==0 &amp;&amp; x!=delivery_row){
+        if(matrix[y][x-1].isRobotOn=false){
+            matrix[y][x-1].isRobotOn=true;
+            matrix[y][x].isRobotOn=false;
+            x--;
+        }
+    }
+    //da delivery row , spostamento in basso per raggiungere la riga pod +1 
+    if( x==delivery_row &amp;&amp; y!=myTask.pod.y - 1){
+        if(matrix[y+1][x].isRobotOn=false){
+            matrix[y+1][x].isRobotOn=true;
+            matrix[y][x].isRobotOn=false;
+            y--;
+        }
+    }
+    //da riga pod + 1  , spostamento a sx per raggiungere la colonna pod 
+    if(y==myTask.pod.y - 1 &amp;&amp; x!=myTask.pod.x ){
+        if(matrix[y][x-1].isRobotOn=false){
+            matrix[y][x-1].isRobotOn=true;
+            matrix[y][x].isRobotOn=false;
+            x--;
+        }
+    }
+    //da riga pod + 1  e colonna del pod, spostamento in basso per consegnare il pod
+    if(y==myTask.pod.y - 1 &amp;&amp; x==myTask.pod.x ){
+        if(matrix[y+1][x].isRobotOn=false){
+            matrix[y+1][x].isRobotOn=true;
+            matrix[y][x].isRobotOn=false;
+            y++;
+            arrived_back = true;
+        }
+    }
+}
 
+void next_step_to_reposition(){
+    if(x!=1){
+        if(matrix[y][x-1].isRobotOn=false){
+            matrix[y][x-1].isRobotOn=true;
+            matrix[y][x].isRobotOn=false;
+            x--;
+        }
+    }
+    if((x==1) &amp;&amp; (matrix[y][x-1].isRobotOn=false)){
+            matrix[y][x-1].isRobotOn=true;
+            matrix[y][x].isRobotOn=false;
+            x--;
+            repositioned=true;
+    }
+    else{
+        if((y!=M-1) &amp;&amp; (matrix[y+1][x].isRobotOn=false)){
+          matrix[y+1][x].isRobotOn=true;
+          matrix[y][x].isRobotOn=false;
+          y++;
+        }
+    }
 }
 </declaration>
-		<location id="id2" x="-2975" y="-833">
-			<name x="-3018" y="-867">waitingTask</name>
+		<location id="id2" x="-3068" y="-816">
+			<name x="-3145" y="-850">waitingTask</name>
 		</location>
 		<location id="id3" x="-2720" y="-654">
 			<name x="-2822" y="-654">getting_pod</name>
@@ -198,7 +252,37 @@ void next_step_to_return() {
 		<location id="id7" x="-2363" y="-731">
 			<name x="-2346" y="-739">waiting_human</name>
 		</location>
+		<location id="id8" x="-2966" y="-943">
+			<name x="-2958" y="-969">repositioning</name>
+			<label kind="invariant" x="-2958" y="-986">t&lt;=K &amp;&amp; repositioned==false</label>
+		</location>
 		<init ref="id2"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-3000" y="-858">queue_length &gt; 0</label>
+			<label kind="synchronisation" x="-2915" y="-841">claim!</label>
+			<label kind="assignment" x="-2966" y="-824">claimTask(), t=0</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-3204" y="-1020">t&gt;=K &amp;&amp; repositioned==false</label>
+			<label kind="assignment" x="-3196" y="-1003">t=0, next_step_to_reposition()</label>
+			<nail x="-2974" y="-1029"/>
+			<nail x="-3025" y="-1020"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-3128" y="-909">repositioned==true</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-2847" y="-935">arrived_back==true</label>
+			<label kind="assignment" x="-2822" y="-918">freePod(), t=0</label>
+		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id5"/>
@@ -208,12 +292,6 @@ void next_step_to_return() {
 			<source ref="id4"/>
 			<target ref="id7"/>
 			<label kind="guard" x="-2354" y="-697">arrived_delivery==true</label>
-		</transition>
-		<transition>
-			<source ref="id6"/>
-			<target ref="id2"/>
-			<label kind="guard" x="-2881" y="-884">arrived_back==true</label>
-			<label kind="assignment" x="-2881" y="-867">freePod()</label>
 		</transition>
 		<transition>
 			<source ref="id6"/>
@@ -247,16 +325,16 @@ void next_step_to_return() {
 			<source ref="id3"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-2746" y="-552">t&gt;=K &amp;&amp; arrived_pod==false</label>
-			<label kind="assignment" x="-2746" y="-569">next_step_to_pod(), t=0</label>
+			<label kind="assignment" x="-2745" y="-569">next_step_to_pod(), t=0</label>
 			<nail x="-2746" y="-586"/>
 			<nail x="-2669" y="-578"/>
 		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-2966" y="-739">queue_length &gt; 0</label>
-			<label kind="synchronisation" x="-2966" y="-705">claim!</label>
-			<label kind="assignment" x="-2966" y="-722">claimTask(), t=0</label>
+			<label kind="guard" x="-3026" y="-748">queue_length &gt; 0</label>
+			<label kind="synchronisation" x="-3009" y="-714">claim!</label>
+			<label kind="assignment" x="-3026" y="-731">claimTask(), t=0</label>
 		</transition>
 	</template>
 	<template>
@@ -264,30 +342,30 @@ void next_step_to_return() {
 		<parameter>int H</parameter>
 		<declaration>clock x;
 </declaration>
-		<location id="id8" x="-450" y="-204">
+		<location id="id9" x="-450" y="-204">
 			<name x="-460" y="-238">idle</name>
 		</location>
-		<location id="id9" x="-365" y="-25">
+		<location id="id10" x="-365" y="-25">
 			<name x="-373" y="-8">picking</name>
 			<label kind="invariant" x="-374" y="9">x&lt;=H</label>
 		</location>
-		<location id="id10" x="-221" y="-93">
+		<location id="id11" x="-221" y="-93">
 			<name x="-231" y="-127">done</name>
 		</location>
-		<init ref="id8"/>
+		<init ref="id9"/>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-348" y="-178">release!</label>
+		</transition>
 		<transition>
 			<source ref="id10"/>
-			<target ref="id8"/>
-			<label kind="synchronisation" x="-348" y="-178">release!</label>
+			<target ref="id11"/>
+			<label kind="guard" x="-263" y="-68">x&gt;=H</label>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-263" y="-68">x&gt;=H</label>
-		</transition>
-		<transition>
-			<source ref="id8"/>
-			<target ref="id9"/>
 			<label kind="synchronisation" x="-450" y="-93">pick?</label>
 			<label kind="assignment" x="-450" y="-110">x=0</label>
 			<nail x="-442" y="-178"/>
