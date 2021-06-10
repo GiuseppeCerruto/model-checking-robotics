@@ -5,13 +5,13 @@
 const int N = 12;
 const int M = 16;
 const int P = 20;
-const int K = 1;
+const int K = 2;
 const int MAX_T = 10;
-const int DeliveryColumn = N-1; // line where robots queue for the delivery point
-const int wait_row = 0;    // line where robots without a task rests
-const int pick_row = N-4; // line where robots travel to reach the desidered pods line in order to pick a pod
-const int delivery_row = N-3; // line where robots travel to reach the desidered pods line in order to deliver a pod
-const int new_task_row = wait_row + 1;
+const int queue_column = N-1; // line where robots queue for the delivery point
+const int wait_column = 0;    // line where robots without a task rests
+const int pick_column = N-4; // line where robots travel to reach the desidered pods line in order to pick a pod
+const int delivery_column = N-3; // line where robots travel to reach the desidered pods line in order to deliver a pod
+const int new_task_column = wait_column + 1;
 
 int freePods = P;
 int head=0;
@@ -29,7 +29,7 @@ int x;
 int y;
 } Position;
  
-Position delivery;
+Position delivery = {11,0};
 Position entry;
 
 typedef struct {
@@ -59,6 +59,7 @@ urgent chan pick, release, claim;
 		<name>TaskDispatcher</name>
 		<parameter>int T</parameter>
 		<declaration>clock x;
+int i=0;
 
 int fint_test(double x) {
     int y=0;
@@ -68,20 +69,22 @@ int fint_test(double x) {
 
 Task create_task(){
     double rand;
-    int i;
+    //int i;
     bool flag=false;
     Task t;
     do {
         rand=random(P-1);
-        i= fint_test(rand); 
+        //i= fint_test(rand); 
         if(pods[i].assigned==false){
             flag=true;
             pods[i].assigned=true;
+            pods[i].x = 2+i; pods[i].y = 4+i; //TOREMOVE
         }
     } while(!flag);
     t.pod=pods[i];
     t.id = i;
     freePods--;
+    i++; //TOREMOVE
     return t;
 }
 
@@ -140,7 +143,7 @@ void enqueue(){
 clock t;
 
 bool arrived_pod, arrived_delivery, arrived_back, repositioned;
-int x,y;
+int x= 9; int y = 15;
 Task myTask;
 
 void claimTask() {
@@ -156,53 +159,110 @@ void freePod() {
     freePods++;
 }
 
-void next_step(int x, int y) {
+bool isFree(int x, int y) {
+
+    return !matrix[x][y].isRobotOn;
 
 }
+
+void move(int h, int v){
+    matrix[x][y].isRobotOn=false;
+    x+=h;
+    y+=v;
+    matrix[x][y].isRobotOn=true;
+}
+
+
+void move_up(){
+    if(isFree(x,y-1) &amp;&amp; y&gt;0){
+        move(0,-1);
+    }
+}
+
+ 
+void move_down(){
+    if(isFree(x,y+1) &amp;&amp; y&lt;M-1){
+        move(0,1);
+    }
+}
+
+ 
+
+void move_left(){
+    if(isFree(x-1,y) &amp;&amp; x&gt;0){
+        move(-1,0);
+    }
+}
+
+ 
+
+void move_right(){
+    if(isFree(x+1,y) &amp;&amp; x&lt; N-1){
+        move(1,0);    
+    }
+}
+
 
 void next_step_to_pod() {
-    arrived_pod = true;
-    //next_step(myTask.pod.x, myTask.pod.y);
 
+    if (x == pick_column &amp;&amp; y &gt; myTask.pod.y) {    //robot is in pick row and needs to reach the pod's line
+        move_up();         
+    } else if (y == myTask.pod.y &amp;&amp; x &gt;= myTask.pod.x) { //robot is in pod's line
+            if (x != myTask.pod.x) { //not reached pod yet
+                move_left();
+            }
+    } else if (y == myTask.pod.y &amp;&amp; x &lt; myTask.pod.x &amp;&amp; x &gt; new_task_column) {
+            move_left();
+    } else if (x == new_task_column &amp;&amp; y != M-1) {
+            move_down();
+    } else if (x == wait_column) {
+            move_right();
+    } else if (y == M-1) {
+        if (x &lt; pick_column) {
+            move_right();
+        } else if (x &gt; pick_column) {
+            move_left();
+        }
+    }
+
+    if (x == myTask.pod.x &amp;&amp; y == myTask.pod.y) {
+        arrived_pod = true;
+    }
 }
 
-void next_step_to_delivery() {
-    arrived_delivery = true;
-    //next_step();
 
+void next_step_to_delivery() {
+
+    if( x==myTask.pod.x &amp;&amp; y==myTask.pod.y ){ //robot is taking the Pod
+        move_down();
+    } else if( x==queue_column ){  //robot is on the delivery column
+        move_up();
+    } else if( x&lt;queue_column-1 ){
+        move_right();         
+    } else if( x==queue_column-1 &amp;&amp; isFree(queue_column,y)){
+        move_right();
+    } else {
+        move_down();
+    }
+        
+
+    if(x==delivery.x &amp;&amp; y==delivery.y ){
+        arrived_delivery=true;
+        return;
+    }   
 }
 
 void next_step_to_return() {
     //da delivery, spostamento a sx per raggiungere la colonna N-3
-    if( y==0 &amp;&amp; x!=delivery_row){
-        if(matrix[y][x-1].isRobotOn=false){
-            matrix[y][x-1].isRobotOn=true;
-            matrix[y][x].isRobotOn=false;
-            x--;
-        }
-    }
-    //da delivery row , spostamento in basso per raggiungere la riga pod +1 
-    if( x==delivery_row &amp;&amp; y!=myTask.pod.y - 1){
-        if(matrix[y+1][x].isRobotOn=false){
-            matrix[y+1][x].isRobotOn=true;
-            matrix[y][x].isRobotOn=false;
-            y--;
-        }
-    }
-    //da riga pod + 1  , spostamento a sx per raggiungere la colonna pod 
-    if(y==myTask.pod.y - 1 &amp;&amp; x!=myTask.pod.x ){
-        if(matrix[y][x-1].isRobotOn=false){
-            matrix[y][x-1].isRobotOn=true;
-            matrix[y][x].isRobotOn=false;
-            x--;
-        }
-    }
-    //da riga pod + 1  e colonna del pod, spostamento in basso per consegnare il pod
-    if(y==myTask.pod.y - 1 &amp;&amp; x==myTask.pod.x ){
-        if(matrix[y+1][x].isRobotOn=false){
-            matrix[y+1][x].isRobotOn=true;
-            matrix[y][x].isRobotOn=false;
-            y++;
+    if( y==0 &amp;&amp; x!=delivery_column){
+        move_left();
+    } else if( x==delivery_column &amp;&amp; y!=myTask.pod.x - 1){ //da delivery row , spostamento in basso per raggiungere la riga pod +1 
+        move_down();
+    } else if(y==myTask.pod.y-1 &amp;&amp; x!=myTask.pod.x ){ //da riga pod + 1  , spostamento a sx per raggiungere la colonna pod 
+        move_left();
+    } else if(y==myTask.pod.y-1 &amp;&amp; x==myTask.pod.x ){ //da riga pod + 1  e colonna del pod, spostamento in basso per consegnare il pod
+        if(isFree(x,y+1)){
+            move_down();
             arrived_back = true;
         }
     }
@@ -210,25 +270,14 @@ void next_step_to_return() {
 
 void next_step_to_reposition(){
     if(x!=1){
-        if(matrix[y][x-1].isRobotOn=false){
-            matrix[y][x-1].isRobotOn=true;
-            matrix[y][x].isRobotOn=false;
-            x--;
-        }
-    }
-    if((x==1) &amp;&amp; (matrix[y][x-1].isRobotOn=false)){
-            matrix[y][x-1].isRobotOn=true;
-            matrix[y][x].isRobotOn=false;
-            x--;
+        move_left();
+    } else if(x==1 &amp;&amp; isFree(x-1,y)){
+            move_left();
             repositioned=true;
-    }
-    else{
-        if((y!=M-1) &amp;&amp; (matrix[y+1][x].isRobotOn=false)){
-          matrix[y+1][x].isRobotOn=true;
-          matrix[y][x].isRobotOn=false;
-          y++;
+    } else if(y!=M-1 &amp;&amp; isFree(x,y+1)){
+          move_down();
         }
-    }
+    
 }
 </declaration>
 		<location id="id2" x="-3068" y="-816">
@@ -374,8 +423,8 @@ void next_step_to_reposition(){
 	<system>// Place template instantiations here.
 robot1 = Robot();
 robot2 = Robot();
-human = Human(1);
-dispatcher = TaskDispatcher(5);
+human = Human(5);
+dispatcher = TaskDispatcher(60);
 // List one or more processes to be composed into a system.
 system robot1, robot2, dispatcher, human;
     </system>
