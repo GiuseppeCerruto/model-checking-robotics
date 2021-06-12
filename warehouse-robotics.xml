@@ -256,7 +256,7 @@ void next_step_to_return() {
     //da delivery, spostamento a sx per raggiungere la colonna N-3
     if( y==0 &amp;&amp; x!=delivery_column){
         move_left();
-    } else if( x==delivery_column &amp;&amp; y!=myTask.pod.x - 1){ //da delivery row , spostamento in basso per raggiungere la riga pod +1 
+    } else if( x==delivery_column &amp;&amp; y!=myTask.pod.y - 1){ //da delivery row , spostamento in basso per raggiungere la riga pod +1 
         move_down();
     } else if(y==myTask.pod.y-1 &amp;&amp; x!=myTask.pod.x ){ //da riga pod + 1  , spostamento a sx per raggiungere la colonna pod 
         move_left();
@@ -301,9 +301,9 @@ void next_step_to_reposition(){
 		<location id="id7" x="-2363" y="-731">
 			<name x="-2346" y="-739">waiting_human</name>
 		</location>
-		<location id="id8" x="-2966" y="-943">
-			<name x="-2958" y="-969">repositioning</name>
-			<label kind="invariant" x="-2958" y="-986">t&lt;=K &amp;&amp; repositioned==false</label>
+		<location id="id8" x="-2966" y="-935">
+			<name x="-2958" y="-961">repositioning</name>
+			<label kind="invariant" x="-2958" y="-978">t&lt;=K</label>
 		</location>
 		<init ref="id2"/>
 		<transition>
@@ -316,10 +316,10 @@ void next_step_to_reposition(){
 		<transition>
 			<source ref="id8"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-3204" y="-1020">t&gt;=K &amp;&amp; repositioned==false</label>
-			<label kind="assignment" x="-3196" y="-1003">t=0, next_step_to_reposition()</label>
-			<nail x="-2974" y="-1029"/>
-			<nail x="-3025" y="-1020"/>
+			<label kind="guard" x="-3204" y="-1012">t&gt;=K &amp;&amp; repositioned==false</label>
+			<label kind="assignment" x="-3196" y="-995">t=0, next_step_to_reposition()</label>
+			<nail x="-2974" y="-1021"/>
+			<nail x="-3025" y="-1012"/>
 		</transition>
 		<transition>
 			<source ref="id8"/>
