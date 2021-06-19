@@ -341,8 +341,8 @@ void next_step_to_reposition(){
 			<name x="-2346" y="-739">waiting_human</name>
 		</location>
 		<location id="id9" x="-2924" y="-960">
-			<name x="-2916" y="-986">repositioning</name>
-			<label kind="invariant" x="-2916" y="-1003">t&lt;=K &amp;&amp; d&lt;delay</label>
+			<name x="-2890" y="-977">repositioning</name>
+			<label kind="invariant" x="-2881" y="-994">t&lt;=K &amp;&amp; d&lt;delay</label>
 		</location>
 		<location id="id10" x="-3213" y="-688">
 			<name x="-3223" y="-722">start</name>
@@ -351,10 +351,18 @@ void next_step_to_reposition(){
 		<transition>
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="guard" x="-2907" y="-1088">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false</label>
-			<label kind="assignment" x="-2907" y="-1071">t=0,next_step_to_reposition(),d=0</label>
-			<nail x="-2915" y="-1062"/>
-			<nail x="-2975" y="-1054"/>
+			<label kind="guard" x="-2881" y="-1079">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false &amp;&amp; t&gt;=K</label>
+			<label kind="assignment" x="-2864" y="-1062">d=0,t=0,next_step_to_reposition()</label>
+			<nail x="-2932" y="-1079"/>
+			<nail x="-2873" y="-1054"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-2975" y="-1139">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false &amp;&amp; t&lt;=K</label>
+			<label kind="assignment" x="-2975" y="-1122">d=0</label>
+			<nail x="-2983" y="-1113"/>
+			<nail x="-3043" y="-1105"/>
 		</transition>
 		<transition>
 			<source ref="id3"/>
