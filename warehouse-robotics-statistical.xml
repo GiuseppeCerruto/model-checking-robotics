@@ -352,7 +352,7 @@ void next_step_to_reposition(){
 			<source ref="id9"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-2907" y="-1088">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false</label>
-			<label kind="assignment" x="-2907" y="-1071">t=0,next_step_to_reposition()</label>
+			<label kind="assignment" x="-2907" y="-1071">t=0,next_step_to_reposition(),d=0</label>
 			<nail x="-2915" y="-1062"/>
 			<nail x="-2975" y="-1054"/>
 		</transition>
