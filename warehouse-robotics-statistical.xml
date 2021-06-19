@@ -352,7 +352,7 @@ void next_step_to_reposition(){
 			<source ref="id9"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-2881" y="-1079">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false &amp;&amp; t&gt;=K</label>
-			<label kind="assignment" x="-2864" y="-1062">d=0,t=0,next_step_to_reposition()</label>
+			<label kind="assignment" x="-2864" y="-1062">d=0,t=0,next_step_to_reposition(),delay=exponential_delay()</label>
 			<nail x="-2932" y="-1079"/>
 			<nail x="-2873" y="-1054"/>
 		</transition>
@@ -360,7 +360,7 @@ void next_step_to_reposition(){
 			<source ref="id9"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-2975" y="-1139">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false &amp;&amp; t&lt;=K</label>
-			<label kind="assignment" x="-2975" y="-1122">d=0</label>
+			<label kind="assignment" x="-2975" y="-1122">d=0,delay=exponential_delay()</label>
 			<nail x="-2983" y="-1113"/>
 			<nail x="-3043" y="-1105"/>
 		</transition>
