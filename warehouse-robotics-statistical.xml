@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>// Place global declarations here.
+	<declaration>
 const int N = 12;
 const int M = 16;
 const int P = 30;
@@ -47,8 +47,7 @@ typedef struct{
 
 Task tasks[MAX_T];
 
-urgent broadcast chan pick, release; 
-broadcast chan claim;
+urgent broadcast chan pick, claim, release; 
 
 void initAll(){
     
@@ -75,10 +74,6 @@ double stdNormal () { // N(0, 1)
 
 double Normal ( double mean , double stdDev ) {
     return mean + stdDev * stdNormal ();
-}
-
-double Exponential(double lambda ){
-    return -(1/lambda)*ln(1-random(1));
 }
 
 
@@ -170,17 +165,13 @@ void enqueue(){
 		<parameter>double lambda</parameter>
 		<declaration>// Place local declarations here.
 
-clock t,d;
+clock t;
 double delay;
 
 bool arrived_pod, arrived_delivery, arrived_back, repositioned;
 int x = 9; 
 int y = 15;
 Task myTask;
-
-double exponential_delay() { 
-    return Exponential(lambda);
-}
 
 void claimTask() {
     myTask = tasks[head];
@@ -320,7 +311,7 @@ void next_step_to_reposition(){
 </declaration>
 		<location id="id3" x="-3068" y="-816">
 			<name x="-3162" y="-841">waitingTask</name>
-			<label kind="invariant" x="-3136" y="-858">t&lt;delay</label>
+			<label kind="exponentialrate" x="-3111" y="-799">lambda</label>
 		</location>
 		<location id="id4" x="-2720" y="-654">
 			<name x="-2822" y="-654">getting_pod</name>
@@ -341,69 +332,28 @@ void next_step_to_reposition(){
 			<name x="-2346" y="-739">waiting_human</name>
 		</location>
 		<location id="id9" x="-2924" y="-960">
-			<name x="-2890" y="-977">repositioning</name>
-			<label kind="invariant" x="-2881" y="-994">t&lt;=K &amp;&amp; d&lt;delay</label>
+			<name x="-2958" y="-918">repositioning</name>
+			<label kind="invariant" x="-2949" y="-935">t&lt;=K</label>
 		</location>
-		<location id="id10" x="-3213" y="-688">
-			<name x="-3223" y="-722">start</name>
-		</location>
-		<init ref="id10"/>
+		<init ref="id3"/>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="guard" x="-2881" y="-1079">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false &amp;&amp; t&gt;=K</label>
-			<label kind="assignment" x="-2864" y="-1062">d=0,t=0,next_step_to_reposition(),delay=exponential_delay()</label>
-			<nail x="-2932" y="-1079"/>
-			<nail x="-2873" y="-1054"/>
-		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
-			<label kind="guard" x="-2975" y="-1139">d&gt;=delay &amp;&amp; queue_length==0 &amp;&amp; repositioned==false &amp;&amp; t&lt;=K</label>
-			<label kind="assignment" x="-2975" y="-1122">d=0,delay=exponential_delay()</label>
-			<nail x="-2983" y="-1113"/>
-			<nail x="-3043" y="-1105"/>
-		</transition>
-		<transition>
-			<source ref="id3"/>
-			<target ref="id3"/>
-			<label kind="guard" x="-3442" y="-858">t&gt;=delay &amp;&amp; queue_length==0</label>
-			<label kind="assignment" x="-3442" y="-841">delay=exponential_delay(),t=0</label>
-			<nail x="-3051" y="-884"/>
-			<nail x="-3221" y="-875"/>
-			<nail x="-3170" y="-799"/>
-		</transition>
-		<transition>
-			<source ref="id10"/>
-			<target ref="id3"/>
-			<label kind="assignment" x="-3391" y="-748">delay=exponential_delay(),t=0</label>
-		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id4"/>
-			<label kind="guard" x="-2966" y="-858">queue_length&gt;0 &amp;&amp; d&gt;=delay</label>
-			<label kind="synchronisation" x="-2966" y="-841">claim!</label>
-			<label kind="assignment" x="-2966" y="-824">claimTask(), t=0</label>
-		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id9"/>
-			<label kind="guard" x="-3315" y="-1019">t&gt;=K &amp;&amp; d&lt;=delay &amp;&amp;repositioned==false</label>
-			<label kind="assignment" x="-3255" y="-1002">t=0, next_step_to_reposition()</label>
-			<nail x="-3000" y="-986"/>
-			<nail x="-3051" y="-977"/>
+			<label kind="guard" x="-3111" y="-1096">t&gt;=K &amp;&amp; repositioned == false</label>
+			<label kind="assignment" x="-3111" y="-1079">t=0, next_step_to_reposition()</label>
+			<nail x="-2949" y="-1055"/>
+			<nail x="-3026" y="-1020"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-3111" y="-952">repositioned==true</label>
-			<label kind="assignment" x="-3187" y="-935">delay=exponential_delay(),t=0</label>
+			<label kind="guard" x="-3128" y="-926">repositioned==true</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-2847" y="-952">arrived_back==true</label>
-			<label kind="assignment" x="-2822" y="-935">freePod(), t=0, delay=exponential_delay(),d=0</label>
+			<label kind="assignment" x="-2822" y="-935">freePod(), t=0</label>
 		</transition>
 		<transition>
 			<source ref="id8"/>
@@ -454,9 +404,9 @@ void next_step_to_reposition(){
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-3085" y="-722">queue_length &gt; 0 &amp;&amp; t&gt;=delay</label>
+			<label kind="guard" x="-3085" y="-722">queue_length &gt; 0</label>
 			<label kind="synchronisation" x="-3060" y="-756">claim!</label>
-			<label kind="assignment" x="-3060" y="-739">claimTask(), t=0</label>
+			<label kind="assignment" x="-3085" y="-739">claimTask(), t=0</label>
 		</transition>
 	</template>
 	<template>
@@ -468,40 +418,40 @@ double delay;
 double normal_delay() {
     return Normal (mu_H , sigma_H);
 }</declaration>
-		<location id="id11" x="-450" y="-204">
+		<location id="id10" x="-450" y="-204">
 			<name x="-460" y="-238">idle</name>
 		</location>
-		<location id="id12" x="-365" y="-25">
+		<location id="id11" x="-365" y="-25">
 			<name x="-373" y="-8">picking</name>
 			<label kind="invariant" x="-374" y="9">x&lt;=delay</label>
 		</location>
-		<location id="id13" x="-221" y="-93">
+		<location id="id12" x="-221" y="-93">
 			<name x="-231" y="-127">done</name>
 		</location>
-		<init ref="id11"/>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id11"/>
-			<label kind="synchronisation" x="-348" y="-178">release!</label>
-		</transition>
+		<init ref="id10"/>
 		<transition>
 			<source ref="id12"/>
-			<target ref="id13"/>
-			<label kind="guard" x="-263" y="-68">x&gt;=delay</label>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-348" y="-178">release!</label>
 		</transition>
 		<transition>
 			<source ref="id11"/>
 			<target ref="id12"/>
+			<label kind="guard" x="-263" y="-68">x&gt;=delay</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
 			<label kind="synchronisation" x="-459" y="-119">pick?</label>
 			<label kind="assignment" x="-603" y="-93">x=0, delay=normal_delay()</label>
 			<nail x="-451" y="-195"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-robots(int[0,3] i) = Robot(1);
+robots(int[0,3] i) = Robot(1.0);
 human = Human(10.0, 1.0);
-//dispatcher = TaskDispatcher(90); // non soddisfa la prorpietà, cioè non va in overflow
-dispatcher = TaskDispatcher(90.0, 2.0); // soddisfa la proprietà, cioè va in overflow
+dispatcher = TaskDispatcher(20.0, 2.0); // soddisfa la prorpietà, cioè va in overflow
+//dispatcher = TaskDispatcher(90.0, 2.0); // soddisfa la proprietà, cioè non va in overflow
 // List one or more processes to be composed into a system.
 system robots, dispatcher, human;
     </system>
@@ -511,7 +461,7 @@ system robots, dispatcher, human;
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000](&lt;&gt; dispatcher.Overflow)</formula>
+			<formula>Pr[&lt;=2000](&lt;&gt; dispatcher.Overflow)</formula>
 			<comment></comment>
 		</query>
 		<query>
