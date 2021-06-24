@@ -129,6 +129,7 @@ void enqueue(){
 		<location id="id0" x="-1921" y="-365">
 			<name x="-1972" y="-416">dispatcher_normal</name>
 			<label kind="invariant" x="-1938" y="-399">x&lt;=delay</label>
+			<label kind="comments" x="-2193" y="-518">Add a task to the queue (FIFO policy)</label>
 		</location>
 		<location id="id1" x="-1377" y="-331">
 			<name x="-1387" y="-365">Overflow</name>
@@ -137,6 +138,8 @@ void enqueue(){
 		<location id="id2" x="-2286" y="-187">
 			<name x="-2296" y="-221">Initial</name>
 			<label kind="invariant" x="-2296" y="-170">x&lt;=0</label>
+			<label kind="comments" x="-2167" y="-195">Initialize the map and 
+set delay with Normal distribution</label>
 		</location>
 		<init ref="id2"/>
 		<transition>
@@ -316,21 +319,27 @@ void next_step_to_reposition(){
 		<location id="id3" x="-3068" y="-816">
 			<name x="-3162" y="-841">waitingTask</name>
 			<label kind="exponentialrate" x="-3111" y="-799">lambda</label>
+			<label kind="comments" x="-3128" y="-697">Take a Task after a time
+distributed as an Exponential</label>
 		</location>
 		<location id="id4" x="-2720" y="-654">
 			<name x="-2822" y="-654">getting_pod</name>
 			<label kind="invariant" x="-2788" y="-671">t&lt;=K</label>
+			<label kind="comments" x="-2745" y="-527">Go to the pod</label>
 		</location>
 		<location id="id5" x="-2363" y="-654">
 			<name x="-2465" y="-629">reaching_delivery</name>
 			<label kind="invariant" x="-2439" y="-612">t&lt;=K</label>
+			<label kind="comments" x="-2210" y="-569">Go to the delivery point</label>
 		</location>
 		<location id="id6" x="-2533" y="-867">
 			<name x="-2543" y="-901">waiting_release</name>
+			<label kind="comments" x="-2584" y="-926">Waits the human operator</label>
 		</location>
 		<location id="id7" x="-2677" y="-850">
 			<name x="-2687" y="-884">returning_pod</name>
 			<label kind="invariant" x="-2686" y="-901">t&lt;=K</label>
+			<label kind="comments" x="-2737" y="-731">Returns the pod to its original position</label>
 		</location>
 		<location id="id8" x="-2363" y="-731">
 			<name x="-2346" y="-739">waiting_human</name>
@@ -338,6 +347,7 @@ void next_step_to_reposition(){
 		<location id="id9" x="-2924" y="-960">
 			<name x="-2958" y="-918">repositioning</name>
 			<label kind="invariant" x="-2949" y="-935">t&lt;=K</label>
+			<label kind="comments" x="-3111" y="-1122">Go to the reposition zone</label>
 		</location>
 		<init ref="id3"/>
 		<transition>
@@ -424,6 +434,7 @@ double normal_delay() {
 }</declaration>
 		<location id="id10" x="-450" y="-204">
 			<name x="-460" y="-238">idle</name>
+			<label kind="comments" x="-603" y="-68">Pick the pod</label>
 		</location>
 		<location id="id11" x="-365" y="-25">
 			<name x="-373" y="-8">picking</name>
@@ -431,6 +442,7 @@ double normal_delay() {
 		</location>
 		<location id="id12" x="-221" y="-93">
 			<name x="-231" y="-127">done</name>
+			<label kind="comments" x="-348" y="-204">Release the pod</label>
 		</location>
 		<init ref="id10"/>
 		<transition>
