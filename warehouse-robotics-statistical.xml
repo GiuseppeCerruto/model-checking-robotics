@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>
+	<declaration>//Configuration 1
+const int MAX_T = 15;
+
+//Configuration 2
+//const int MAX_T = 10;
+
 const int N = 12;
 const int M = 16;
 const int P = 30;
 const int K = 1;
-const int MAX_T = 10;
 const int queue_column = N-1; // line where robots queue for the delivery point
 const int wait_column = 0;    // line where robots without a task rests
 const int pick_column = N-4; // line where robots travel to reach the desidered pods line in order to pick a pod
@@ -447,25 +451,21 @@ double normal_delay() {
 			<nail x="-451" y="-195"/>
 		</transition>
 	</template>
-	<system>// Place template instantiations here.
-robots(int[0,3] i) = Robot(1.0);
-human = Human(10.0, 1.0);
-dispatcher = TaskDispatcher(20.0, 2.0); // soddisfa la prorpietà, cioè va in overflow
-//dispatcher = TaskDispatcher(90.0, 2.0); // soddisfa la proprietà, cioè non va in overflow
-// List one or more processes to be composed into a system.
+	<system>// Configuration 1
+robots(int[0,5] i) = Robot(1.0);
+human = Human(10.0, 1.0); 
+dispatcher = TaskDispatcher(80.0, 2.0); 
+
+//Configuration 2
+//robots(int[0,4] i) = Robot(1.0);
+//human = Human(15.0, 1.0);
+//dispatcher = TaskDispatcher(40.0, 2.0);
+
 system robots, dispatcher, human;
     </system>
 	<queries>
 		<query>
-			<formula>A[] not deadlock</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=2000](&lt;&gt; dispatcher.Overflow)</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; dispatcher.Overflow</formula>
+			<formula>Pr[&lt;=10000](&lt;&gt; dispatcher.Overflow)</formula>
 			<comment></comment>
 		</query>
 	</queries>
